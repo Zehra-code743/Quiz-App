@@ -2,259 +2,153 @@
 Project: Streamlit-Based PDF Study Assistant (Gemini OpenAgents SDK)
 Version: Ultra-Clean Zero-Bloat Architecture
 1. System Objective
-
 Design a minimal, fast, production-clean intelligent study companion that:
 
-Core Tasks
+Core Tasks:
 
-Extracts text from academic PDFs.
+Extract text from academic PDFs
 
-Produces structured study notes and concept summaries.
+Produce structured study notes and concept summaries
 
-Generates MCQ/mixed-format quizzes.
+Generate MCQ/mixed-format quizzes
 
-Runs fully in Streamlit with a smooth, distraction-free UI.
+Run fully in Streamlit with a smooth, distraction-free UI
 
-Uses Google Gemini (gemini-2.0-flash) through OpenAgents SDK — not OpenAI SDK.
+Use Google Gemini (gemini-2.0-flash) through OpenAgents SDK — not OpenAI SDK
 
-No TensorFlow.
-No heavy PDF libraries.
-No extra dependencies.
+Restrictions:
 
-Only:
-streamlit, PyPDF2, openai-agents, python-dotenv.
+No TensorFlow
 
-2. Architectural Summary
-A. Core Engine
+No heavy PDF libraries
 
-Powered by a single intelligent agent:
+No extra dependencies
 
-📌 StudyAgent
+Allowed Libraries:
 
-Model: gemini-2.0-flash
+streamlit
 
-Wrapped using OpenAgents SDK
+PyPDF2
 
-Tools bound:
+openai-agents
 
-extract_pdf_text (PyPDF2)
+python-dotenv
 
-summarize_text (Agent)
+Architectural Summary:
 
-generate_quiz (Agent)
+Core Engine:
+The system is powered by a single intelligent agent embedded within main.py. The agent uses the gemini-2.0-flash model wrapped via OpenAgents SDK. Internally, it handles PDF text extraction, text cleaning, summary generation, and quiz generation.
 
 Agent System Prompt:
+“You are a Pedagogical AI System. First summarize the input text into clear study notes. Then generate an assessment-quality quiz based strictly on the text.”
 
-“You are a Pedagogical AI System.
-First summarize the input text into clear study notes.
-Then generate an assessment-quality quiz based strictly on the text.”
-
-B. Application Components
-1. tools.py
-
-Contains the lowest-level utility functions:
-
-Function	Responsibility
-extract_pdf_text(path)	Read PDF → plain text
-clean_text(text)	Remove extra spaces, artifacts
-format_quiz_output(raw)	Convert agent JSON → readable quiz
-2. agent.py
-
-Defines the Gemini agent:
+Application Component: main.py
 
 Responsibilities:
 
-Initialize OpenAgents Agent.
+PDF upload interface
 
-Register all tool functions.
+Text extraction and cleaning
 
-Provide run_summary(text) and run_quiz(text) wrappers.
+Summary generation using the Gemini agent
 
-Ensure consistent request format to Gemini.
+Quiz generation using the Gemini agent
 
-3. app.py
+Display outputs in Streamlit UI
 
-Provides backend functions for Streamlit:
+Optional Light/Dark mode toggle
 
-Responsibilities:
+Scrollable summary and quiz containers
 
-Handle uploaded PDF.
+Key Features:
 
-Call tools & agent methods.
+Minimal zero-bloat design
 
-Preprocess and store session state.
+Async processing for agent calls
 
-Deliver clean outputs to UI.
+Single-file modular structure
 
-4. main.py
+Ready-to-implement, production-ready code
 
-Streamlit UI layer:
+Clean abstraction, easy to extend for future features (memory, retrieval-augmented generation, streaming)
 
-Responsibilities:
+Folder Structure:
 
-PDF uploader
+.gemini/
+settings.json
+gemini.md
+main.py
+pyproject.toml
+README.md
+.env
+uv.lock
 
-Summary viewer
+Functional Architecture:
 
-Quiz generator button
+PDF Upload:
+Accepts PDF files and shows a preview of extracted text (first 2,000 characters).
 
-Light/Dark toggle
+Text Processing:
+Extracts text from PDF using PyPDF2 and cleans it by removing extra spaces and artifacts.
 
-Responsive layout + scrollable sections
+AI Agent:
+Uses Gemini via OpenAgents SDK to summarize text and generate quizzes (MCQs and reasoning questions). Converts agent output into a readable format.
 
-3. Folder Structure
-task4/
-│── .gemini/
-│     └── settings.json
-│── gemini.md
-│── main.py
-│── pyproject.toml
-│── README.md
-│── .env
-└── uv.lock
+UI Display:
+Scrollable summary and quiz containers, optional Light/Dark toggle, modern card-style layout.
 
-4. Detailed Functional Architecture
-tools.py — Utility Layer
-Responsibilities
+Flow:
+User uploads PDF → Text is extracted and cleaned → Agent generates summary → Agent generates quiz → Streamlit UI displays summary and quiz
 
-Be extremely small + fast.
-
-Follow Zero-Bloat rule.
-
-Only handle raw operations (PDF → text, formatting).
-
-Contents
-
-Extract PDF text.
-
-Clean text.
-
-Format quiz from agent output.
-
-agent.py — AI Reasoning Layer
-Responsibilities
-
-Create and configure the Gemini agent.
-
-Bind tools according to OpenAgents SDK syntax.
-
-Provide two public methods:
-
-agent_summary(text)
-
-agent_quiz(text)
-
-Behavior
-
-Always summarize first.
-
-Then generate quiz.
-
-Use the same text extracted from PDF.
-
-app.py — Business Logic Layer
-Responsibilities
-
-Glue between UI and agent.
-
-Load PDF and extract text.
-
-Request summary from agent.
-
-Request quiz.
-
-Cache results in Streamlit session_state.
-
-Outputs
-
-Clean summary
-
-Clean quiz
-
-Stable error-free execution
-
-main.py — Streamlit Interface Layer
-Responsibilities
-
-Full user experience.
-
-File upload widget.
-
-Summary container.
-
-Quiz container.
-
-Modern UI (cards, subtle shadows, dark mode).
-
-Calls methods from app.py.
-
-Sections
-
-Header
-
-Upload Area
-
-Summary Card
-
-Quiz Card
-
-5. Flow Diagram
-[User Uploads PDF]
-       |
-       v
-tools.extract_pdf_text()
-       |
-       v
-agent.agent_summary()
-       |
-       v
-agent.agent_quiz()
-       |
-       v
-Streamlit UI displays summary + quiz
-
-6. Example End-to-End User Flow
+Example End-to-End User Flow:
 
 User uploads "Chapter 3 – Neuroanatomy.pdf".
 
-Text extraction using PyPDF2.
+Text extraction occurs using PyPDF2.
 
-Agent receives text → produces summary:
+Agent receives text and produces a summary containing key points, definitions, and concepts.
 
-Key points
+Quiz is generated containing MCQs and reasoning questions.
 
-Definitions
+UI displays scrollable summary and quiz card with answers hidden.
 
-Concepts
+Testing Scenarios:
 
-Quiz generated (MCQs mixed with reasoning questions).
+Small PDFs → Summary + quiz instantly
 
-UI displays:
+Large PDFs (50 pages) → Summary concise, quiz accurate
 
-Scrollable summary card
+Complex formatting → Cleaned text output
 
-Quiz card with answers hidden
+Repeated uploads → Session state resets cleanly
 
-7. Testing Scenarios
-Test	Expected Result
-Small PDF	Summary + quiz instantly
-Large PDF (50 pages)	Summary concise, quiz accurate
-Complex formatting	Cleaned text output
-Repeated uploads	Session state resets cleanly
-Missing PDF	Graceful stop
-8. Unique Improvements Over the Original Version
+Missing PDFs → Graceful stop
 
-✔ Fully architected like an enterprise AI system
-✔ Four-layer structure (tools → agent → app → UI)
-✔ Standardized agent prompts and workflows
-✔ Modular design for future scaling (memory, RAG, etc.)
-✔ Professional system-level documentation
-✔ Zero-bloat enforced at architectural level
-✔ Clean abstraction boundaries
-✔ Ready-to-implement code files
+Unique Improvements Over Original Version:
 
-✅ If you want, I can now generate:
-Option A — Full working code for all files (main.py, agent.py, tools.py, app.py)
-Option B — pyproject.toml + README.md
-Option C — Entire zip folder structure with code
-Option D — Same architecture but with streaming responses
+Fully architected like an enterprise AI system
+
+Single-file structure (main.py)
+
+Standardized agent prompt and workflow
+
+Async agent calls for smooth performance
+
+Clean abstraction boundaries
+
+Ready-to-implement, production-ready code
+
+Minimal zero-bloat design
+
+Easy to extend for future features (memory, RAG, streaming)
+
+Next Steps / Options:
+
+Run main.py directly in Streamlit
+
+Add Light/Dark mode and card-style UI
+
+Extend the agent to handle multiple PDFs and caching.
+
+
+
