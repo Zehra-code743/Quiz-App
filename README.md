@@ -177,10 +177,6 @@ agent.agent_quiz()
 v
 Streamlit UI displays summary + quiz
 
-yaml
-Copy code
-
----
 
 ## 6. Example End-to-End User Flow
 
@@ -226,7 +222,8 @@ Copy code
 
 You can now generate:
 
-- **Option A:** Full working code for all files (`main.py`, `agent.py`, `tools.py`, `app.py`)
+- **Option A:** Full working code for all files (`main.py)
 - **Option B:** `pyproject.toml` + `README.md`
 - **Option C:** Entire zip folder structure with code
 - **Option D:** Same architecture but with streaming responses
+
