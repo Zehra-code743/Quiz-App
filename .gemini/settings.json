@@ -1,0 +1,25 @@
+{
+  "ide": {
+    "hasSeenNudge": true
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "CONTEXT7_API_KEY": ""
+      }
+    }
+  },
+  "api_key": "",
+  "project_id": "",
+  "region": "us-central1",
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  }
+}
