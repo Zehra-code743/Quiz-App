@@ -108,9 +108,6 @@ task4/
 │     └── settings.json
 │── gemini.md
 │── main.py
-│── agent.py
-│── app.py
-│── tools.py
 │── pyproject.toml
 │── README.md
 │── .env
