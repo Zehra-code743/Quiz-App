@@ -1,4 +1,4 @@
-# 📖 PDF STYUDY ASsISTANT & Quiz Generator – AI-Powered Learning from PDFs
+# 📖 PDF STYUDY ASSISTANT & Quiz Generator – AI-Powered Learning from PDFs
 
 Transform your PDFs into **interactive study material** with this **Streamlit-powered application**. Upload any academic PDF, and a **Gemini-powered AI agent** will generate **structured study notes** and a **ready-to-use quiz** in seconds. Perfect for students, educators, and lifelong learners!  
 
@@ -104,5 +104,6 @@ uv.lock
 4. Run the Streamlit app  
    ```bash
    streamlit run main.py
+
 
 
