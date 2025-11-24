@@ -2,19 +2,27 @@ import os
 import asyncio
 import pypdf
 import streamlit as st
-from dotenv import load_dotenv
 
 from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
 from openai import AsyncOpenAI
 
+# ---------------------------------------------------
+# API Key Setup (Streamlit Secrets or .env)
+# ---------------------------------------------------
+if hasattr(st, "_is_running_with_streamlit") and st._is_running_with_streamlit:
+    # Running on Streamlit Cloud
+    API_KEY = st.secrets.get("GEMINI_API_KEY")
+else:
+    # Local VS Code
+    from dotenv import load_dotenv
+    load_dotenv()
+    API_KEY = os.getenv("GEMINI_API_KEY")
 
-# ---------------------------------------------------
-# Load .env
-# ---------------------------------------------------
-load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY")
 MODEL_NAME = "gemini-2.5-flash"
 
+if not API_KEY:
+    st.error("❌ GEMINI_API_KEY missing! Add it to .env (local) or Streamlit Secrets (cloud).")
+    st.stop()
 
 # ---------------------------------------------------
 # PDF Extractor (UI)
@@ -28,7 +36,6 @@ def extract_pdf_text_normal(file_path: str) -> str:
             text.append(pg.extract_text() or "")
     return "\n".join(text)
 
-
 # ---------------------------------------------------
 # Agent Tool (PDF Extractor)
 # ---------------------------------------------------
@@ -36,7 +43,6 @@ def extract_pdf_text_normal(file_path: str) -> str:
 def extract_pdf_text(file_path: str) -> str:
     """Tool version of PDF extractor for Gemini."""
     return extract_pdf_text_normal(file_path)
-
 
 # ---------------------------------------------------
 # Agent Setup
@@ -66,7 +72,6 @@ def get_agent():
         tools=[extract_pdf_text],
     )
 
-
 # ---------------------------------------------------
 # Async Runner
 # ---------------------------------------------------
@@ -75,7 +80,6 @@ async def run_agent(agent, text):
         starting_agent=agent,
         input=f"Create summary, key points, and quiz from this text:\n\n{text}"
     )
-
 
 # ---------------------------------------------------
 # Custom UI Styling
@@ -124,7 +128,6 @@ def load_custom_css():
             }
         </style>
     """, unsafe_allow_html=True)
-
 
 # ---------------------------------------------------
 # Streamlit UI
@@ -175,18 +178,16 @@ def run_streamlit_app():
             st.info("⏳ Processing your PDF... Please wait.")
 
             try:
+                # Run async safely
                 result = asyncio.run(run_agent(agent, pdf_text))
                 st.success("🎉 Completed Successfully!")
-
                 st.subheader("📝 Summary + Key Points + Quiz")
                 st.write(result.final_output)
-
             except Exception as e:
                 st.error("❌ An error occurred.")
                 st.exception(e)
 
         st.markdown('</div>', unsafe_allow_html=True)
-
 
 # ---------------------------------------------------
 # Main Entry
