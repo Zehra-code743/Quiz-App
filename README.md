@@ -21,6 +21,33 @@ bash
 Copy code
 streamlit run main.py
 
+## ⚡ Quick Start (Using VS Code + UV)
+
+This project was originally created using **UV** for a clean, modern workflow.  
+Below are the exact steps used for building the environment.
+
+### **1️⃣ Create a new UV project**
+```bash
+uv init
+2️⃣ Create & activate virtual environment
+bash
+Copy code
+uv venv
+Windows:
+
+bash
+Copy code
+.venv\Scripts\activate
+Mac/Linux:
+
+bash
+Copy code
+source .venv/bin/activate
+3️⃣ Install required packages using UV
+bash
+Copy code
+uv add streamlit python-dotenv openai-agents pypdf
+
 ## 🤖 How It Works
 
 - **PDF Upload:** Drop your PDF into the app.  
@@ -69,10 +96,12 @@ README.md
 .env
 uv.lock
 
-
-
 ## 🧠 How to Use
 
-1. **Open the Streamlit app:**  
-```bash
-streamlit run main.py
+1. Open the project in **VS Code**  
+2. Set up the environment (using **pip** or **uv**)  
+3. Create and add your **.env** file  
+4. Run the Streamlit app  
+   ```bash
+   streamlit run main.py
+
