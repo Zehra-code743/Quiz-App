@@ -7,20 +7,23 @@ from dotenv import load_dotenv
 from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
 from openai import AsyncOpenAI
 
-
-# ---------------------------------------------------
-# Load .env
-# ---------------------------------------------------
+# ---------------------------
+# Load .env for local testing
+# ---------------------------
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 MODEL_NAME = "gemini-2.5-flash"
 
+if not API_KEY:
+    st.error("❌ GEMINI_API_KEY not found. Set it in .env or Streamlit Secrets!")
+    st.stop()
 
-# ---------------------------------------------------
-# PDF Extractor (UI)
-# ---------------------------------------------------
+
+# ---------------------------
+# PDF Extractor
+# ---------------------------
 def extract_pdf_text_normal(file_path: str) -> str:
-    """Extract text from PDF pages for UI."""
+    """Extract text from PDF pages."""
     text = []
     with open(file_path, "rb") as pdf:
         reader = pypdf.PdfReader(pdf)
@@ -29,47 +32,50 @@ def extract_pdf_text_normal(file_path: str) -> str:
     return "\n".join(text)
 
 
-# ---------------------------------------------------
-# Agent Tool (PDF Extractor)
-# ---------------------------------------------------
 @function_tool
 def extract_pdf_text(file_path: str) -> str:
-    """Tool version of PDF extractor for Gemini."""
+    """Tool version for Gemini."""
     return extract_pdf_text_normal(file_path)
 
 
-# ---------------------------------------------------
+# ---------------------------
 # Agent Setup
-# ---------------------------------------------------
+# ---------------------------
 @st.cache_resource
 def get_agent():
-    client = AsyncOpenAI(
-        api_key=API_KEY,
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-    )
+    """Initialize Gemini agent safely."""
+    try:
+        client = AsyncOpenAI(
+            api_key=API_KEY,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+        )
 
-    model = OpenAIChatCompletionsModel(
-        model=MODEL_NAME,
-        openai_client=client
-    )
+        model = OpenAIChatCompletionsModel(
+            model=MODEL_NAME,
+            openai_client=client
+        )
 
-    return Agent(
-        model=model,
-        name="StudyNotesAI",
-        instructions=(
-            "You are an AI Study Assistant.\n"
-            "1️⃣ Generate a structured summary.\n"
-            "2️⃣ Extract key learning points.\n"
-            "3️⃣ Create a quiz (MCQs + short questions).\n"
-            "Make everything neat, organized, and easy to study."
-        ),
-        tools=[extract_pdf_text],
-    )
+        return Agent(
+            model=model,
+            name="StudyNotesAI",
+            instructions=(
+                "You are an AI Study Assistant.\n"
+                "1️⃣ Generate a structured summary.\n"
+                "2️⃣ Extract key learning points.\n"
+                "3️⃣ Create a quiz (MCQs + short questions).\n"
+                "Make everything neat, organized, and easy to study."
+            ),
+            tools=[extract_pdf_text],
+        )
+    except Exception as e:
+        st.error("❌ Failed to initialize the AI agent. Check API key and network.")
+        st.exception(e)
+        st.stop()
 
 
-# ---------------------------------------------------
-# Async Runner
-# ---------------------------------------------------
+# ---------------------------
+# Async Runner Wrapper
+# ---------------------------
 async def run_agent(agent, text):
     return await Runner.run(
         starting_agent=agent,
@@ -77,15 +83,13 @@ async def run_agent(agent, text):
     )
 
 
-# ---------------------------------------------------
-# Custom UI Styling
-# ---------------------------------------------------
+# ---------------------------
+# Custom CSS
+# ---------------------------
 def load_custom_css():
     st.markdown("""
         <style>
-            body {
-                font-family: 'Inter', sans-serif;
-            }
+            body { font-family: 'Inter', sans-serif; }
 
             .title-container {
                 background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -126,9 +130,9 @@ def load_custom_css():
     """, unsafe_allow_html=True)
 
 
-# ---------------------------------------------------
+# ---------------------------
 # Streamlit UI
-# ---------------------------------------------------
+# ---------------------------
 def run_streamlit_app():
     st.set_page_config(page_title="AI PDF Study Assistant", layout="wide")
     load_custom_css()
@@ -144,11 +148,9 @@ def run_streamlit_app():
     uploaded_file = st.file_uploader("📄 Upload a PDF file", type=["pdf"])
 
     if uploaded_file:
-        # ==============================
-        # PDF Upload + Extraction Card
-        # ==============================
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
+        # Temp folder for PDF storage
         temp_folder = "temp_uploads"
         os.makedirs(temp_folder, exist_ok=True)
 
@@ -161,12 +163,9 @@ def run_streamlit_app():
         pdf_text = extract_pdf_text_normal(file_path)
         st.subheader("📄 Extracted Text from PDF")
         st.text_area("Raw PDF Content", pdf_text, height=320)
-
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # ==============================
         # AI Generation Card
-        # ==============================
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
         agent = get_agent()
@@ -182,14 +181,14 @@ def run_streamlit_app():
                 st.write(result.final_output)
 
             except Exception as e:
-                st.error("❌ An error occurred.")
+                st.error("❌ An error occurred while generating output.")
                 st.exception(e)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-# ---------------------------------------------------
-# Main Entry
-# ---------------------------------------------------
+# ---------------------------
+# Main
+# ---------------------------
 if __name__ == "__main__":
     run_streamlit_app()
